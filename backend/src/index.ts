@@ -22,9 +22,13 @@ app.use((err: unknown, _req: Request, res: Response, next: NextFunction) => {
   return next(err);
 });
 
-app.listen(config.port, () => {
+const server = app.listen(config.port, () => {
   console.log(`[backend] listening on http://localhost:${config.port}`);
   if (!config.nvidia.apiKey) {
     console.warn("[backend] WARNING: NVIDIA_API_KEY is not set — /api/import/stream will error.");
   }
 });
+
+server.requestTimeout = 0;
+server.keepAliveTimeout = 60_000;
+server.headersTimeout = 65_000;

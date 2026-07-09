@@ -44,10 +44,16 @@ importRouter.post("/import/stream", upload.single("file"), async (req, res) => {
     "Cache-Control": "no-cache, no-transform",
     Connection: "keep-alive",
   });
+  res.flushHeaders();
 
   const send = (event: ProgressEvent) => {
     res.write(`data: ${JSON.stringify(event)}\n\n`);
   };
+
+  const heartbeat = setInterval(() => {
+    res.write(`: keep-alive ${Date.now()}\n\n`);
+  }, 12_000);
+  res.on("close", () => clearInterval(heartbeat));
 
   try {
     assertLlmConfigured();
@@ -67,6 +73,7 @@ importRouter.post("/import/stream", upload.single("file"), async (req, res) => {
       message: err instanceof Error ? err.message : "Import failed",
     });
   } finally {
+    clearInterval(heartbeat);
     res.end();
   }
 });
