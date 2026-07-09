@@ -5,7 +5,7 @@ import { chunk, type CsvRow } from "./csv";
 import { buildMessages, type IndexedRow } from "./prompt";
 import { normalizeRecord, rowHasContact } from "./validate";
 
-/** Lazily constructed so importing this module never requires a key (tests mock it). */
+
 let client: OpenAI | null = null;
 export function getClient(): OpenAI {
   if (!client) {
@@ -70,11 +70,7 @@ async function callModel(messages: ChatMessages): Promise<string> {
   return completion.choices[0]?.message?.content ?? "";
 }
 
-/**
- * Call the model for one batch and return its raw entries.
- * Retries once on a JSON *parse* failure, nudging the model to fix its formatting
- * (JSON mode guarantees valid JSON, not the required {records:[...]} shape).
- */
+
 async function mapBatch(rows: IndexedRow[]): Promise<LlmEntry[]> {
   const messages = buildMessages(rows);
 
@@ -99,11 +95,6 @@ async function mapBatch(rows: IndexedRow[]): Promise<LlmEntry[]> {
 
 export type ProgressCallback = (processed: number, total: number) => void;
 
-/**
- * Map every CSV row to a validated CRM record.
- * Rows are processed in batches; `onProgress` is called after each batch with the
- * number of source rows processed so far.
- */
 export async function importRows(
   rows: CsvRow[],
   onProgress?: ProgressCallback,

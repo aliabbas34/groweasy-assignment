@@ -2,7 +2,7 @@ import { describe, expect, it, vi, beforeEach } from "vitest";
 import type OpenAI from "openai";
 import { extractJson, importRows, setClient } from "../src/services/llm";
 
-/** Build a stub OpenAI client whose create() returns queued JSON string replies. */
+
 function stubClient(replies: string[]): OpenAI {
   const create = vi.fn(async () => {
     const content = replies.shift() ?? "{}";
@@ -22,7 +22,6 @@ describe("extractJson", () => {
 
 describe("importRows", () => {
   beforeEach(() => {
-    // Small batch size irrelevant here; a single batch is fine for these inputs.
   });
 
   it("maps rows, applies enum coercion, and preserves order via index", async () => {
@@ -89,7 +88,6 @@ describe("importRows", () => {
   });
 
   it("falls back to the deterministic skip rule when the model omits a row", async () => {
-    // Model returns no entry for index 0.
     setClient(stubClient([JSON.stringify({ records: [] })]));
 
     const result = await importRows([{ Name: "Nobody", Note: "brochure" }]);

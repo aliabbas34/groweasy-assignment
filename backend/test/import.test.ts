@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { extractRows, stripBom } from "../src/routes/import";
 
-// extractRows only reads the uploaded `file`, so a minimal partial request is enough.
 const req = (file?: { buffer: Buffer }) => ({ file }) as any;
 const asFile = (csv: string) => ({ buffer: Buffer.from(csv, "utf8") });
 

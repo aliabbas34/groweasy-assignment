@@ -15,16 +15,13 @@ const upload = multer({
   limits: { fileSize: 10 * 1024 * 1024 },
 });
 
-/** Drop a leading UTF-8 BOM (common in Excel/Windows CSV exports) so it doesn't
- * corrupt the first header. */
+
 export function stripBom(text: string): string {
   return text.charCodeAt(0) === 0xfeff ? text.slice(1) : text;
 }
 
-/**
- * Parse the uploaded CSV file into records. The API accepts exactly one thing:
- * a multipart/form-data upload in the `file` field. Anything else is rejected.
- */
+
+
 export function extractRows(req: Pick<Request, "file">): CsvRow[] {
   const file = req.file;
   if (!file?.buffer) {
