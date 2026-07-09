@@ -7,7 +7,7 @@ interface PreviewTableProps {
   rows: CsvRow[];
 }
 
-/** Scrollable preview of the uploaded CSV with a sticky header row. Renders every row. */
+
 export function PreviewTable({ headers, rows }: PreviewTableProps) {
   return (
     <div className="flex flex-col rounded-xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">

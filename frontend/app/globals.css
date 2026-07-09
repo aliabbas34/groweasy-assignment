@@ -16,7 +16,7 @@ body {
   }
 }
 
-/* Indeterminate progress sweep: shows the bar is actively working while a batch is in flight. */
+
 @keyframes progress-slide {
   0% {
     transform: translateX(-120%);

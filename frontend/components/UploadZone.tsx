@@ -6,7 +6,6 @@ interface UploadZoneProps {
   onFile: (file: File) => void;
 }
 
-/** Drag-and-drop CSV dropzone with a click-to-browse fallback. */
 export function UploadZone({ onFile }: UploadZoneProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [dragging, setDragging] = useState(false);

@@ -7,7 +7,6 @@ export interface ParsedCsv {
   rows: CsvRow[];
 }
 
-/** Parse a CSV File in the browser into headers + string-only row objects. */
 export function parseCsvFile(file: File): Promise<ParsedCsv> {
   return new Promise((resolve, reject) => {
     Papa.parse<Record<string, unknown>>(file, {
