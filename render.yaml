@@ -1,0 +1,21 @@
+# Render blueprint for the backend API.
+# Deploy: push to GitHub, then "New > Blueprint" on Render and point it at this repo.
+# Set NVIDIA_API_KEY and CORS_ORIGIN (your Vercel URL) in the dashboard afterwards.
+services:
+  - type: web
+    name: groweasy-backend
+    runtime: node
+    plan: free
+    buildCommand: npm install && npm run build:shared && npm run build --workspace @groweasy/backend
+    startCommand: node backend/dist/index.js
+    envVars:
+      - key: NVIDIA_API_KEY
+        sync: false
+      - key: NVIDIA_BASE_URL
+        value: https://integrate.api.nvidia.com/v1
+      - key: LLM_MODEL
+        value: mistralai/mistral-medium-3.5-128b
+      - key: BATCH_SIZE
+        value: "15"
+      - key: CORS_ORIGIN
+        sync: false
