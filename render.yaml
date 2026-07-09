@@ -16,6 +16,6 @@ services:
       - key: LLM_MODEL
         value: mistralai/mistral-medium-3.5-128b
       - key: BATCH_SIZE
-        value: "15"
+        value: "6"
       - key: CORS_ORIGIN
         sync: false

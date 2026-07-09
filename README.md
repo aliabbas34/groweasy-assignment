@@ -5,7 +5,6 @@ column names or layout — into a fixed set of **15 standardized CRM fields**. U
 preview it, confirm, and the backend batches the rows through the model and returns clean,
 validated CRM records, skipping rows that have no contact info.
 
-Built for the GrowEasy Software Developer assignment.
 
 - **Frontend:** Next.js (App Router) + TypeScript + Tailwind
 - **Backend:** Node.js + Express + TypeScript
@@ -41,37 +40,6 @@ unparseable date, or drops a row, the code corrects it. This is what makes the o
 
 ---
 
-## Prompt engineering (the core of this assignment)
-
-The prompt lives in [`backend/src/services/prompt.ts`](backend/src/services/prompt.ts). Design choices:
-
-- **One explicit system prompt** fixes the role, the exact 15-field output schema, both enum
-  whitelists **verbatim** (generated from the shared constants so they can never drift), and every
-  extraction rule.
-- **Index-keyed JSON output** (`{ "records": [{ "index", "skip", "reason", "record" }] }`) lets the
-  backend align each output to its input row and preserve order even across batches.
-- **Few-shot example** demonstrates the hard cases in one shot: messy headers, **multiple
-  emails/phones** (primary kept, extras appended to `crm_note`), **country-code splitting** from a
-  full phone number, a **status mapped** from free text, a **data_source** matched from a fuzzy
-  project name, and a **row with no contact info → skipped**.
-- **Anti-hallucination**: the model is told never to invent values (unknown → `""`) and to choose a
-  `data_source` only on a confident match.
-- **Determinism**: `temperature: 0` and JSON mode (`response_format: json_object`), with a one-shot
-  retry that re-prompts on malformed JSON.
-
-### The CRM contract
-
-15 fields: `created_at, name, email, country_code, mobile_without_country_code, company, city,
-state, country, lead_owner, crm_status, crm_note, data_source, possession_time, description`.
-
-- `crm_status` ∈ `GOOD_LEAD_FOLLOW_UP | DID_NOT_CONNECT | BAD_LEAD | SALE_DONE` (else `""`)
-- `data_source` ∈ `leads_on_demand | meridian_tower | eden_park | varah_swamy | sarjapur_plots` (else `""`)
-- `created_at` must be parseable by `new Date()`.
-- Primary email/phone kept; extras appended to `crm_note`.
-- **Skip** any row with neither email nor mobile.
-
----
-
 ## Getting started
 
 ### Prerequisites
@@ -89,10 +57,6 @@ npm run dev                   # builds shared, then runs backend :4000 + fronten
 ```
 
 Open <http://localhost:3000>.
-
-> Verify the exact model id on build.nvidia.com. If `mistralai/mistral-medium-3.5-128b` is
-> unavailable, set `LLM_MODEL` in `.env` to any other NIM chat model (e.g. a Llama/Qwen instruct) —
-> only that string changes; the base URL and JSON mode are the same.
 
 ### Environment variables
 All configured in `.env` (see [`.env.example`](.env.example)):
@@ -141,26 +105,6 @@ Covers (in `backend/test/`, LLM fully mocked — no live API calls):
 A sample messy CSV that exercises every rule lives at
 [`backend/test/fixtures/messy-leads.csv`](backend/test/fixtures/messy-leads.csv).
 
----
-
-## Deployment
-
-### Backend → Render
-A [`render.yaml`](render.yaml) blueprint is included. On Render: **New → Blueprint**, point it at
-the repo, then set `NVIDIA_API_KEY` and `CORS_ORIGIN` (your Vercel URL) in the dashboard.
-
-### Frontend → Vercel
-Import the repo, then set:
-- **Root Directory:** `frontend`
-- **Build Command:** `cd .. && npm run build:shared && cd frontend && next build`
-  (builds the shared package before the Next build)
-- **Environment:** `NEXT_PUBLIC_API_URL` = your Render backend URL
-
-After both are live, update the backend's `CORS_ORIGIN` to the Vercel URL and redeploy.
-
-> Live URLs: _add after deploying_ — Frontend: `…` · Backend: `…`
-
----
 
 ## API
 
@@ -187,12 +131,3 @@ GET /health
 
 Returns `{ "ok": true, "model": "<LLM_MODEL>", "llmConfigured": <boolean> }` — a lightweight
 liveness probe (e.g. for Render) that also reports the active model and whether an API key is set.
-
-## Notes & trade-offs
-- The **API accepts the CSV file itself** and parses it server-side (per the brief) — nothing else.
-  The web UI also parses the file in the browser, but only to render the preview; on confirm it
-  uploads the real file, so `parseCsv` on the server is the single authoritative parse.
-- Batches are processed sequentially for predictable progress and to stay within free-tier rate
-  limits; this could be parallelized with a concurrency cap for speed.
-- The code-side validation layer is deliberately authoritative over the model — correctness does
-  not depend on the LLM behaving perfectly.
